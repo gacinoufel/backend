@@ -1,10 +1,11 @@
 package com.example.backend.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,6 @@ public class AuthController {
 
     private final JwtService jwtService;
 
-    @Autowired
     public AuthController(JwtService jwtService, UserService userService, AuthenticationManager authenticationManager) {
         this.jwtService = jwtService;
         this.userService = userService;
@@ -35,12 +35,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-        UserDTO user = userService.getUserByUsername(authRequest.getUsername());
-        final String jwt = jwtService.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(jwt));
+    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+
+            UserDTO user = userService.getUserByUsername(authRequest.getUsername());
+            final String jwt = jwtService.generateToken(user);
+            return ResponseEntity.ok(new AuthResponse(jwt));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with username: " + authRequest.getUsername());
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password for username: " + authRequest.getUsername());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login: " + e.getMessage());
+        }
     }
 
     @PostMapping("/register")
