@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dtos.ProductDTO;
+import com.example.backend.dtos.ProductRequestDTO;
+import com.example.backend.dtos.ProductResponseDTO;
+
 import com.example.backend.services.product.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/products")
@@ -31,28 +34,28 @@ public class ProductController {
 
     @GetMapping("/public")
     @Operation(summary = "Get all products public", description = "Retrieve a list of all products accessible publicly")
-    public List<ProductDTO> getAllProductsPublic() {
+    public List<ProductResponseDTO> getAllProductsPublic() {
         return productService.getAllProducts();
     }
 
     @PostMapping
-    public ProductDTO createProduct(@RequestBody ProductDTO productDTO) {
-        return productService.createProduct(productDTO);
+    public ProductResponseDTO createProduct(@Valid @RequestBody ProductRequestDTO ProductRequestDTO) {
+        return productService.createProduct(ProductRequestDTO);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve a product by its ID")
-    public ProductDTO getProductById(
+    public ProductResponseDTO getProductById(
             @Parameter(description = "ID of the product to retrieve", required = true) @PathVariable Long id) {
         return productService.getProductById(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a product", description = "Update an existing product by its ID")
-    public ProductDTO updateProduct(
+    public ProductResponseDTO updateProduct(
             @Parameter(description = "ID of the product to update", required = true) @PathVariable Long id,
-            @RequestBody ProductDTO productDTO) {
-        return productService.updateProduct(id, productDTO);
+            @RequestBody ProductRequestDTO ProductRequestDTO) {
+        return productService.updateProduct(id, ProductRequestDTO);
     }
 
     @DeleteMapping("/{id}")

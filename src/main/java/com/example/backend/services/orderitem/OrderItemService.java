@@ -1,17 +1,18 @@
 package com.example.backend.services.orderitem;
 
-import com.example.backend.dtos.OrderItemDTO;
+import com.example.backend.dtos.OrderItemRequestDTO;
+import com.example.backend.dtos.OrderItemResponseDTO;
 import java.util.List;
 
 public interface OrderItemService {
 
-    OrderItemDTO createOrderItem(OrderItemDTO orderItemDTO);
+    OrderItemResponseDTO createOrderItem(OrderItemRequestDTO orderItemRequestDTO);
 
-    OrderItemDTO getOrderItemById(Long orderItemId);
+    OrderItemResponseDTO getOrderItemById(Long orderItemId);
 
-    List<OrderItemDTO> getAllOrderItems();
+    List<OrderItemResponseDTO> getAllOrderItems();
 
     void deleteOrderItem(Long orderItemId);
 
-    OrderItemDTO updateOrderItem(Long orderItemId, OrderItemDTO orderItemDTO);
+    OrderItemResponseDTO updateOrderItem(Long orderItemId, OrderItemRequestDTO orderItemRequestDTO);
 }

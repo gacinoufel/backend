@@ -1,17 +1,20 @@
 package com.example.backend.services.product;
 
-import com.example.backend.dtos.ProductDTO;
+import com.example.backend.dtos.ProductRequestDTO;
+
 import java.util.List;
+
+import com.example.backend.dtos.ProductResponseDTO;
 
 public interface ProductService {
 
-    ProductDTO createProduct(ProductDTO productDTO);
+    ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO);
 
-    ProductDTO getProductById(Long productId);
+    ProductResponseDTO getProductById(Long productId);
 
-    List<ProductDTO> getAllProducts();
+    List<ProductResponseDTO> getAllProducts();
 
     void deleteProduct(Long productId);
 
-    ProductDTO updateProduct(Long productId, ProductDTO productDTO);
+    ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO);
 }

@@ -3,13 +3,9 @@ package com.example.backend.dtos;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
-public class OrderDTO {
+public class OrderItemResponseDTO extends OrderItemRequestDTO {
 
     private Long id;
-    private Long userId;
-    private Set<OrderItemDTO> items;
 }

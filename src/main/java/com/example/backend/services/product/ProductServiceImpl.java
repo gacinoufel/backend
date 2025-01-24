@@ -1,10 +1,13 @@
 package com.example.backend.services.product;
 
-import com.example.backend.dtos.ProductDTO;
+import com.example.backend.dtos.ProductResponseDTO;
+import com.example.backend.dtos.ProductRequestDTO;
+
 import com.example.backend.entities.Product;
 import com.example.backend.repositories.ProductRepository;
 import com.example.backend.utils.ModelMapperUtils;
 import org.springframework.stereotype.Service;
+import com.example.backend.exceptions.ProductNotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,42 +24,42 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO createProduct(ProductDTO productDTO) {
-        Product product = modelMapperUtils.getModelMapper().map(productDTO, Product.class);
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+        Product product = modelMapperUtils.getModelMapper().map(productRequestDTO, Product.class);
         Product savedProduct = productRepository.save(product);
-        return modelMapperUtils.getModelMapper().map(savedProduct, ProductDTO.class);
+        return modelMapperUtils.getModelMapper().map(savedProduct, ProductResponseDTO.class);
     }
 
     @Override
-    public ProductDTO getProductById(Long productId) {
+    public ProductResponseDTO getProductById(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
-        return modelMapperUtils.getModelMapper().map(product, ProductDTO.class);
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
+        return modelMapperUtils.getModelMapper().map(product, ProductResponseDTO.class);
     }
 
     @Override
-    public List<ProductDTO> getAllProducts() {
+    public List<ProductResponseDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()
-                .map(product -> modelMapperUtils.getModelMapper().map(product, ProductDTO.class))
+                .map(product -> modelMapperUtils.getModelMapper().map(product, ProductResponseDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteProduct(Long productId) {
         if (!productRepository.existsById(productId)) {
-            throw new RuntimeException("Product not found with ID: " + productId);
+            throw new ProductNotFoundException("Product not found with ID: " + productId);
         }
         productRepository.deleteById(productId);
     }
 
     @Override
-    public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
+    public ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 
-        modelMapperUtils.getModelMapper().map(productDTO, product);
+        modelMapperUtils.getModelMapper().map(productRequestDTO, product);
         Product updatedProduct = productRepository.save(product);
-        return modelMapperUtils.getModelMapper().map(updatedProduct, ProductDTO.class);
+        return modelMapperUtils.getModelMapper().map(updatedProduct, ProductResponseDTO.class);
     }
 }

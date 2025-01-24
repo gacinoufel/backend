@@ -10,11 +10,10 @@ import com.example.backend.repositories.UserRepository;
 import com.example.backend.utils.ModelMapperUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import com.example.backend.exceptions.UsernameAlreadyExistsException;
-
+import com.example.backend.exceptions.RoleNotFoundException;
+import com.example.backend.exceptions.UserNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -36,8 +35,17 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+    }
+
+    private UserDTO convertToDTO(User user) {
+        return modelMapperUtils.getModelMapper().map(user, UserDTO.class);
+    }
+
     @Override
-    public UserDTO createUser(AuthRequest authRequest) throws UsernameAlreadyExistsException {
+    public UserDTO createUser(AuthRequest authRequest) throws RoleNotFoundException {
         if (authRequest.getUsername() == null || authRequest.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
@@ -46,7 +54,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userRepository.findByUsername(authRequest.getUsername()).isPresent()) {
-            throw new UsernameAlreadyExistsException("Username already exists: " + authRequest.getUsername());
+            throw new RoleNotFoundException("Username already exists: " + authRequest.getUsername());
         }
 
         User user = new User();
@@ -54,25 +62,24 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
 
         Role userRole = roleRepository.findByRoleType(RoleType.USER)
-                .orElseThrow(() -> new RuntimeException("Role USER not found"));
+                .orElseThrow(() -> new RoleNotFoundException("Role USER not found"));
         user.setRole(userRole);
 
         User savedUser = userRepository.save(user);
-        return modelMapperUtils.getModelMapper().map(savedUser, AuthRequest.class);
+        return convertToDTO(savedUser);
     }
 
     @Override
     public UserDTO getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-        return modelMapperUtils.getModelMapper().map(user, AuthRequest.class);
+        User user = findUserById(userId);
+        return convertToDTO(user);
     }
 
     @Override
     public UserDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-        return modelMapperUtils.getModelMapper().map(user, AuthRequest.class);
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found with username: " + username));
+        return convertToDTO(user);
     }
 
     @Override
@@ -96,15 +103,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new RuntimeException("User not found with ID: " + userId);
+            throw new UserNotFoundException("User not found with ID: " + userId);
         }
         userRepository.deleteById(userId);
     }
 
     @Override
     public UserDTO updateUser(Long userId, UserDTO userDTO) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        User user = findUserById(userId);
 
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
             String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
@@ -113,6 +119,6 @@ public class UserServiceImpl implements UserService {
 
         user.setUsername(userDTO.getUsername());
         User updatedUser = userRepository.save(user);
-        return modelMapperUtils.getModelMapper().map(updatedUser, UserDTO.class);
+        return convertToDTO(updatedUser);
     }
 }
