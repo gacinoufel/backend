@@ -1,7 +1,7 @@
 package com.example.backend.controllers;
 
-import com.example.backend.dtos.OrderItemRequestDTO;
-import com.example.backend.dtos.OrderItemResponseDTO;
+import com.example.backend.dtos.orderitem.OrderItemRequestDTO;
+import com.example.backend.dtos.orderitem.OrderItemResponseDTO;
 import com.example.backend.services.orderitem.OrderItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

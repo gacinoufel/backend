@@ -1,5 +1,6 @@
 package com.example.backend.security;
 
+import com.example.backend.services.user.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.example.backend.services.user.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
@@ -36,32 +35,32 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/h2-console").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/orders").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/orders/{id}").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/orders").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/orders/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/orders/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/products/public").permitAll()
-                .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/products/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/products/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/order-items").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/order-items/{id}").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/order-items").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/order-items/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/order-items/{id}").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/h2-console").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/orders").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/orders/{id}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/orders").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/orders/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/orders/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/products/public").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/products/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/order-items").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/order-items/{id}").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/order-items").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/order-items/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/order-items/{id}").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
-                .frameOptions(frameOptions -> frameOptions.disable())
+                        .frameOptions(frameOptions -> frameOptions.disable())
                 )
                 .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,6 +1,5 @@
 package com.example.backend.entities;
 
-import com.example.backend.entities.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +14,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -28,6 +27,6 @@ public class User {
     private Role role;
 
     public String getRoleName() {
-        return role != null ? role.getRoleType().toString() : RoleType.USER.toString();
+        return role != null ? role.getRoleName() : "USER";
     }
 }

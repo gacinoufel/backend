@@ -1,25 +1,25 @@
 package com.example.backend.services.user;
 
-import com.example.backend.dtos.AuthRequest;
-import com.example.backend.dtos.UserDTO;
+import com.example.backend.dtos.auth.AuthRequest;
+import com.example.backend.dtos.user.UserRequestDTO;
+import com.example.backend.dtos.user.UserResponseDTO;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
-import org.springframework.security.core.userdetails.UserDetails;
-
 public interface UserService {
 
-    UserDTO createUser(AuthRequest authRequest);
+    UserResponseDTO createUser(AuthRequest authRequest);
 
-    UserDTO getUserById(Long userId);
+    UserResponseDTO getUserById(Long userId);
 
-    UserDTO getUserByUsername(String username);
+    UserResponseDTO getUserByUsername(String username);
 
     UserDetails loadUserByUsername(String username);
 
-    List<UserDTO> getAllUsers();
+    List<UserResponseDTO> getAllUsers();
 
     void deleteUser(Long userId);
 
-    UserDTO updateUser(Long userId, UserDTO userDTO);
+    UserResponseDTO updateUser(Long userId, UserRequestDTO userRequestDTO);
 }

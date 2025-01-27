@@ -1,7 +1,8 @@
 package com.example.backend.services.order;
 
-import com.example.backend.dtos.OrderRequestDTO;
-import com.example.backend.dtos.OrderResponseDTO;
+import com.example.backend.dtos.order.OrderRequestDTO;
+import com.example.backend.dtos.order.OrderResponseDTO;
+
 import java.util.List;
 
 public interface OrderService {

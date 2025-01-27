@@ -1,5 +1,9 @@
 package com.example.backend.security;
 
+import com.example.backend.dtos.user.UserResponseDTO;
+import com.example.backend.entities.User;
+import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -8,10 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import com.example.backend.dtos.UserDTO;
-import com.example.backend.repositories.UserRepository;
-import com.example.backend.entities.User;
-import com.example.backend.exceptions.ResourceNotFoundException;
 
 import java.security.Key;
 import java.util.Date;
@@ -36,7 +36,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(UserDTO userDTO) {
+    public String generateToken(UserResponseDTO userDTO) {
         String username = Optional.ofNullable(userDTO.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Username must not be null"));
 

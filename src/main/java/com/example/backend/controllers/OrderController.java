@@ -1,19 +1,16 @@
 package com.example.backend.controllers;
 
-import com.example.backend.dtos.OrderRequestDTO;
-import com.example.backend.dtos.OrderResponseDTO;
+import com.example.backend.dtos.order.OrderRequestDTO;
+import com.example.backend.dtos.order.OrderResponseDTO;
 import com.example.backend.services.order.OrderService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController

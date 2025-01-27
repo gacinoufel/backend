@@ -1,25 +1,9 @@
 package com.example.backend.entities;
 
-import java.util.HashSet;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.Set;
-
-import com.example.backend.entities.enums.RoleType;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Getter
@@ -32,13 +16,14 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID du rôle
+    private Long roleId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
-    private RoleType roleType;
+    private String roleName;
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    @ToString.Exclude // pour eviter la récursion infinie dans toString()
-    private Set<User> users = new HashSet<>();
+    @ToString.Exclude
+    private Set<User> users;
+
+
 }

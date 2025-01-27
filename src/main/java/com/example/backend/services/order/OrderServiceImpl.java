@@ -1,67 +1,55 @@
 package com.example.backend.services.order;
 
-import com.example.backend.dtos.OrderRequestDTO;
-import com.example.backend.dtos.OrderResponseDTO;
+import com.example.backend.dtos.order.OrderRequestDTO;
+import com.example.backend.dtos.order.OrderResponseDTO;
 import com.example.backend.entities.Order;
-import com.example.backend.entities.User;
 import com.example.backend.exceptions.OrderNotFoundException;
-import com.example.backend.exceptions.UserNotFoundException;
+import com.example.backend.mappers.OrderMapper;
 import com.example.backend.repositories.OrderRepository;
-import com.example.backend.repositories.UserRepository;
-import com.example.backend.utils.ModelMapperUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final ModelMapperUtils modelMapperUtils;
+    private final OrderMapper orderMapper;
 
-    public OrderServiceImpl(
-            OrderRepository orderRepository,
-            UserRepository userRepository,
-            ModelMapperUtils modelMapperUtils) {
-        this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-        this.modelMapperUtils = modelMapperUtils;
-    }
-
-    private Order findOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
-    }
-
-    private OrderResponseDTO convertToDTO(Order order) {
-        return modelMapperUtils.getModelMapper().map(order, OrderResponseDTO.class);
-    }
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
-        Order order = modelMapperUtils.getModelMapper().map(orderRequestDTO, Order.class);
-
-        User user = userRepository.findById(orderRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + orderRequestDTO.getUserId()));
-        order.setUser(user);
-
+        Order order = orderMapper.fromRequestDTOToEntity(orderRequestDTO);
         Order savedOrder = orderRepository.save(order);
-        return convertToDTO(savedOrder);
+        return orderMapper.fromEntityToResponseDTO(savedOrder);
     }
 
     @Override
     public OrderResponseDTO getOrderById(Long orderId) {
-        Order order = findOrderById(orderId);
-        return convertToDTO(order);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+        return orderMapper.fromEntityToResponseDTO(order);
     }
 
     @Override
     public List<OrderResponseDTO> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
-                .map(this::convertToDTO)
+                .map(orderMapper::fromEntityToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderResponseDTO updateOrder(Long orderId, OrderRequestDTO orderRequestDTO) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+
+        orderMapper.updateEntityFromRequestDTO(orderRequestDTO, order);
+        Order updatedOrder = orderRepository.save(order);
+        return orderMapper.fromEntityToResponseDTO(updatedOrder);
     }
 
     @Override
@@ -70,13 +58,5 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderNotFoundException("Order not found with ID: " + orderId);
         }
         orderRepository.deleteById(orderId);
-    }
-
-    @Override
-    public OrderResponseDTO updateOrder(Long orderId, OrderRequestDTO orderRequestDTO) {
-        Order order = findOrderById(orderId);
-        modelMapperUtils.getModelMapper().map(orderRequestDTO, order);
-        Order updatedOrder = orderRepository.save(order);
-        return convertToDTO(updatedOrder);
     }
 }
