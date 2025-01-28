@@ -3,6 +3,9 @@ package com.example.backend.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Entity
 @Getter
 @Setter
@@ -22,11 +25,18 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 
-    public String getRoleName() {
-        return role != null ? role.getRoleName() : "USER";
+
+    public Set<String> getRoleNames() {
+        return roles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
     }
 }

@@ -6,7 +6,9 @@ import com.example.backend.services.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,20 +22,23 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
     @GetMapping("/public")
     @Operation(summary = "Get all products public", description = "Retrieve a list of all products accessible publicly")
-    public ResponseEntity<List<ProductResponseDTO>> getAllProductsPublic() {
+    public ResponseEntity<List<ProductResponseDTO>> getAllProductsPublic(HttpServletRequest request) {
         List<ProductResponseDTO> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
     @PostMapping
     @Operation(summary = "Create a product", description = "Create a new product")
-    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<ProductResponseDTO> createProduct(
+            @Valid @RequestBody ProductRequestDTO productRequestDTO,
+            HttpServletRequest request) {
         ProductResponseDTO createdProduct = productService.createProduct(productRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
@@ -41,7 +46,8 @@ public class ProductController {
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve a product by its ID")
     public ResponseEntity<ProductResponseDTO> getProductById(
-            @Parameter(description = "ID of the product to retrieve", required = true) @PathVariable Long id) {
+            @Parameter(description = "ID of the product to retrieve", required = true) @PathVariable Long id,
+            HttpServletRequest request) {
         ProductResponseDTO product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
@@ -50,7 +56,8 @@ public class ProductController {
     @Operation(summary = "Update a product", description = "Update an existing product by its ID")
     public ResponseEntity<ProductResponseDTO> updateProduct(
             @Parameter(description = "ID of the product to update", required = true) @PathVariable Long id,
-            @RequestBody ProductRequestDTO productRequestDTO) {
+            @RequestBody ProductRequestDTO productRequestDTO,
+            HttpServletRequest request) {
         ProductResponseDTO updatedProduct = productService.updateProduct(id, productRequestDTO);
         return ResponseEntity.ok(updatedProduct);
     }
@@ -58,7 +65,8 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a product", description = "Delete a product by its ID")
     public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "ID of the product to delete", required = true) @PathVariable Long id) {
+            @Parameter(description = "ID of the product to delete", required = true) @PathVariable Long id,
+            HttpServletRequest request) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

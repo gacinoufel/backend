@@ -1,5 +1,6 @@
 package com.example.backend.services.user;
 
+import com.example.backend.entities.Role;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +22,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRoleName())
+                .roles(user.getRoles().stream()
+                        .map(Role::getRoleName)
+                        .toArray(String[]::new))
                 .build();
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RoleInitializer {
 
-    // Remplissage de la base de données avec les 2 rôles ADMIN et USER
+
     @Bean
     public CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {

@@ -21,9 +21,6 @@ public class Role {
     @Column(nullable = false, unique = true)
     private String roleName;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @ManyToMany(mappedBy = "roles")
     private Set<User> users;
-
-
 }

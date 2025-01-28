@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,17 +34,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO createUser(AuthRequest authRequest) {
         UserRequestDTO userRequestDTO = authMapper.authRequestToUserRequestDTO(authRequest);
-        Role defaultRole = roleRepository.findByRoleName("USER")
-                .orElseThrow(() -> new IllegalStateException("Role USER not found in the database"));
+        if (userRequestDTO.getRoleIds() == null || userRequestDTO.getRoleIds().isEmpty()) {
+            Role defaultRole = roleRepository.findByRoleName("USER")
+                    .orElseThrow(() -> new IllegalStateException("Role USER not found in the database"));
+            userRequestDTO.setRoleIds(Collections.singleton(defaultRole.getRoleId()));
+        }
+
+        Set<Role> roles = roleRepository.findAllById(userRequestDTO.getRoleIds())
+                .stream()
+                .collect(Collectors.toSet());
+
         User user = userMapper.fromRequestDTOToEntity(userRequestDTO);
-        user.setRole(defaultRole);
+        user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
 
         User savedUser = userRepository.save(user);
         return userMapper.fromEntityToResponseDTO(savedUser);
     }
-
-
     @Override
     public UserResponseDTO getUserById(Long userId) {
         User user = userRepository.findById(userId)
@@ -73,15 +81,21 @@ public class UserServiceImpl implements UserService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRole().toString())
+                .roles(user.getRoles().stream()
+                        .map(Role::getRoleName)
+                        .toArray(String[]::new))
                 .build();
     }
-
 
     @Override
     public UserResponseDTO updateUser(Long userId, UserRequestDTO userRequestDTO) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        Set<Role> roles = roleRepository.findAllById(userRequestDTO.getRoleIds())
+                .stream()
+                .collect(Collectors.toSet());
+        user.setRoles(roles);
 
         userMapper.updateEntityFromRequestDTO(userRequestDTO, user);
         User updatedUser = userRepository.save(user);

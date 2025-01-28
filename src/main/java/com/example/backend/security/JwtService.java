@@ -1,6 +1,7 @@
 package com.example.backend.security;
 
 import com.example.backend.dtos.user.UserResponseDTO;
+import com.example.backend.entities.Role;
 import com.example.backend.entities.User;
 import com.example.backend.exceptions.ResourceNotFoundException;
 import com.example.backend.repositories.UserRepository;
@@ -14,11 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -43,18 +42,22 @@ public class JwtService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 
+
+        Set<String> roles = user.getRoles().stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
+
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRoleName());
+        claims.put("roles", roles);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .claim("username", username) // Utilisation de "username" au lieu de "sub"
-                .setIssuedAt(new Date()) // Renommé en "issuedAt"
-                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // Renommé en "expiresAt"
+                .claim("username", username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
