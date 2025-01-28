@@ -1,6 +1,8 @@
 package com.example.backend.aspects;
 
+import com.example.backend.services.useractionlog.UserActionLogService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -8,32 +10,29 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import java.util.logging.Logger;
-
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class UserTrackingAspect {
 
-    private static final Logger logger = Logger.getLogger(UserTrackingAspect.class.getName());
+    private final UserActionLogService userActionLogService;
 
-    @Pointcut("execution(* com.example.backend.controllers..*(..)) && args(.., request)")
-    public void apiMethods(HttpServletRequest request) {
+    @Pointcut("execution(* com.example.backend.controllers..*(..))")
+    public void apiMethods() {
     }
 
-    @Before("apiMethods(request)")
+    @Before("apiMethods() && args(.., request)")
     public void logUserAction(HttpServletRequest request) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = principal instanceof User ? ((User) principal).getUsername() : "UNKNOWN";
+        String username = "UNKNOWN";
 
-        if (!(principal instanceof User)) {
-            logger.warning("L'utilisateur n'est pas authentifiée ni reconnu");
+        if (principal instanceof User) {
+            username = ((User) principal).getUsername();
         }
-
         String method = request.getMethod();
         String url = request.getRequestURI();
         String ip = request.getRemoteAddr();
-
-        logger.info(() -> String.format("L'utilisateur %s a effectué une requête %s sur l'URL %s depuis l'IP %s",
-                username, method, url, ip));
+        String action = method + " " + url;
+        userActionLogService.logUserAction(username, action, method, url, ip);
     }
 }

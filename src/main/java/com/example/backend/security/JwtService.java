@@ -42,22 +42,22 @@ public class JwtService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
 
-
         Set<String> roles = user.getRoles().stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
+        claims.put("username", username);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .claim("username", username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -67,8 +67,11 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("username", String.class));
     }
 
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public Set<String> extractRoles(String token) {
+        return extractClaim(token, claims -> {
+            List<String> roles = claims.get("roles", List.class);
+            return new HashSet<>(roles);
+        });
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
